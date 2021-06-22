@@ -72,7 +72,7 @@ public:
 
     void TestStripSubstrateAdhesion()
     {
-        // assert(false);
+        assert(false);
         // for sliding
 
         /*------------------------------START: Basic Settings----------------------------*/
@@ -242,7 +242,7 @@ public:
 
         // Cell polarity
         bool   has_polarity = true;
-        double polarity_magnitude = 0.2;
+        double polarity_magnitude = 0.4;
         bool   seed_manually = true;
         unsigned seed_for_initial_random_polarity = 1u;
         // seed_for_initial_random_polarity += 10;

@@ -103,7 +103,7 @@ public:
         double center_of_width = 0.0;       // change made by Chao
         double width = num_ele_cross*sqrt(initial_area/(sqrt(3)/2));   //width of reservoir, change made by Chao
 
-        double strip_width = 20*0.5*sqrt(initial_area/(sqrt(3)/2)); // default =0.9523 (1/2 cell width)
+        double strip_width = 10*0.5*sqrt(initial_area/(sqrt(3)/2)); // default =0.9523 (1/2 cell width)
         if  (strip_width_doubled_for_multiple_leading_cells)
             strip_width = strip_width*strip_width_mutiple;
       //  strip_width *= strip_width_multiple_for_sliding;
@@ -244,7 +244,7 @@ public:
         bool   has_polarity = true;
         double polarity_magnitude = 0.2;
         bool   seed_manually = true;
-        unsigned seed_for_initial_random_polarity = 9u;
+        unsigned seed_for_initial_random_polarity = 1u;
         // seed_for_initial_random_polarity += 10;
         double rotational_diffusion_constant = 40.0*0.01/(M_PI/reference_area);
 
