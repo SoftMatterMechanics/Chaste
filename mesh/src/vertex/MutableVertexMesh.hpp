@@ -126,8 +126,6 @@ protected:
     std::vector< c_vector<double, SPACE_DIM> > mLocationsOfT3Swaps;
 
     // my changes
-    double mMultiplyResultsBy;
-
     int mMoveMeshRightForNPeriods;
 
     bool mIfUpdateFaceElementsInMesh;
@@ -697,11 +695,6 @@ public:
      * \todo This method seems to be redundant; remove it? (#2401)
      */
     void ReMesh();
-
-    void SetMultiplyResultsBy(double multiplyResultsBy)
-    {
-      mMultiplyResultsBy = multiplyResultsBy;
-    }
     
     void SetMoveMeshRightForNPeriods(int moveMeshRightForNPeriods)
     {

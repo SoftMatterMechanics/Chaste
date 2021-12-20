@@ -161,11 +161,7 @@ void OutputFileHandler::CommonConstructor(const std::string& rDirectory,
 std::string OutputFileHandler::GetChasteTestOutputDirectory()
 {
     // char* chaste_test_output = getenv("CHASTE_TEST_OUTPUT");
-    // const char* chaste_test_output = "/home/chao/Desktop/testoutput/";
-    const char *user = getenv("USER");
-    std::string str1 = user;
-    std::string str2 = "/home/" + str1 + "/Desktop/testoutput/";
-    const char* chaste_test_output = str2.c_str();
+    const char* chaste_test_output = "/home/chao/Desktop/testoutput/";
 
     FileFinder directory_root;
     if (chaste_test_output == nullptr || *chaste_test_output == 0)

@@ -151,8 +151,6 @@ protected:
         // My changes.    
     double mMyosinActivity;
 
-    bool mUseMyDivisionRuleAlongWithModifier;
-
     // bool mIsLeadingCell;
 
     // bool mIsJustReAttached;
@@ -437,16 +435,6 @@ public:
     double GetMyosinActivity()
     {
         return mMyosinActivity;
-    }
-
-    void SetUseMyDivisionRuleAlongWithModifier(bool useMyDivisionRuleAlongWithModifier)
-    {
-        mUseMyDivisionRuleAlongWithModifier = useMyDivisionRuleAlongWithModifier;
-    }
-
-    void SetCanDivide(bool canDivide)
-    {
-        mCanDivide = canDivide;
     }
 
     // void SetIsLeadingCell(bool isLeadingCell)

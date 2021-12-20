@@ -67,34 +67,21 @@ class FaceValueAndStressStateModifier : public AbstractCellBasedSimulationModifi
 protected:
 
     bool   mIfConsiderFeedbackOfFaceValues;
-    bool   mIfConsiderFeedbackOfFaceValuesOnlyForBoundaryCells;
-    bool   mIfConsiderFeedbackOfFaceValuesOnlyForTopBoundaryCells;
-    bool   mApplyFeedbackOfFaceValuesToTopBoundaryCellsAndCellsAboveReservior;
     double mStripWidth;
     double mStripDistance; // change made by Chao
     double mStripStartXLocation;
     double mStripStartYLocation;
     bool   mIfConsiderFeedbackOfCellCellAdhesion;
 
-    bool   mEMADontDecreaseWhenEdgeShrink;
-    bool   mCCADontDecreaseWhenEdgeExpand;
-    bool   mCCAIncreasingHasAThresholdOfEdgeLength;
-    double mCCAIncreasingThresholdOfEdgeLengthPercentage;
-
-    bool   mEMADontDecreaseBelowAThreshold;
-    double mEMADontDecreaseBelowThisThreshold;
-
-    double mEdgeLengthAtRest;
     double mKmForMyosinFeedback;
     double mFeedbackRateForMyosinActivity;
     double mHillPowerForMyosinActivity;
     double mKsForAdhesionFeedback;
     double mFeedbackRateForAdhesion;
     double mHillPowerForAdhesion;
+    double mReferenceStress;
 
     bool   mIfCalculateStressState;
-    bool   mIfSetCellDataOfEachForceContributions;
-    unsigned mCaseNumberOfMembraneSurfaceEnergyForm;
     bool   mUseFixedTargetArea;
     double mFixedTargetArea;
     double mFixedTargetPerimeter;
@@ -102,14 +89,11 @@ protected:
     double mNagaiHondaMembraneSurfaceEnergyParameter;
     double mNagaiHondaCellCellAdhesionEnergyParameter;
     double mNagaiHondaCellBoundaryAdhesionEnergyParameter;
-
-    bool   mUseMyDivisionRuleAlongWithModifier;
-    double mDivisionTime;
+    double mChangedNagaiHondaMembraneSurfaceEnergyParameter;
+    double mChangedNagaiHondaCellCellAdhesionEnergyParameter;
 
     bool   mWriteGroupNumberToCell;
-    bool   mWriteVertexVelocityAndForceToCellData;
-    bool   mWriteForcesFromNeighboringCellsToCellData;
-    
+
     bool   mMarkLeadingCells;
     bool   mMultipleLeadingCells;
     unsigned mLeadingCellNumber;
@@ -118,14 +102,10 @@ protected:
 
     bool   mIfOutputModifierInformation;
 
-    bool   mHasMyosinActivityDepression;
-    double mMyosinActivityDepressedTime;
-    double mMyosinActivityDepressingRate;
-
-    double mTimeForChangingFeedback;
+    double mTimeForChanging;
     double mChangedKmForMyosinFeedback;
+    double mChangedKsForAdhesionFeedback;
     double mChangedFeedbackRate;
-    double mChangedMyosinActivityBaseValue;
 
     // start of change made by Chao
     double mSmallChangeForAreaCalculation;
@@ -136,6 +116,9 @@ protected:
     double mWidth;
     double mCenterOfWidth;
     bool   mConsiderConsistencyForSSA;
+
+    bool mIfEquilibrateForAWhile;
+    double mEndTimeForEquilibrium;
     // end of change made by Chao
 
 public:
@@ -159,16 +142,20 @@ public:
 
     void UpdateStressStateOfCell(AbstractCellPopulation<DIM,DIM>& rCellPopulation, CellPtr pCell);
     
-    void UpdateCellDataOfForcesFromNeighboringCell(AbstractCellPopulation<DIM,DIM>& rCellPopulation, CellPtr pCell);
-    
     void UpdateMyosinActivtyOfElement(MutableVertexMesh<DIM, DIM>* pMesh, unsigned elem_index);  // change made by Chao
 
     void UpdateUnifiedCellCellAdhesionEnergyParameterOfFace(AbstractCellPopulation<DIM,DIM>& rCellPopulation, unsigned faceIndex);
 
   // start of change made by Chao
-    c_vector<double, DIM> GetStripSubstrateAdhesionAreaGradientOfElementAtNode(AbstractCellPopulation<DIM>& rCellPopulation,VertexElement<DIM,DIM>* pElement, unsigned localIndex);
+    void SetupLeaderCellAtTheEndOfEquilibrium(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
 
-    c_vector<double, DIM> GetReservoirSubstrateAdhesionAreaGradientOfElementAtNode(AbstractCellPopulation<DIM>& rCellPopulation, VertexElement<DIM,DIM>* pElement, unsigned localIndex);
+    void SetupSolveForLamellipodiumInfoOfCells(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
+
+    void UpdateLamellipodiumInfoOfCells(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
+
+    // c_vector<double, DIM> GetStripSubstrateAdhesionAreaGradientOfElementAtNode(AbstractCellPopulation<DIM>& rCellPopulation,VertexElement<DIM,DIM>* pElement, unsigned localIndex);
+
+    // c_vector<double, DIM> GetReservoirSubstrateAdhesionAreaGradientOfElementAtNode(AbstractCellPopulation<DIM>& rCellPopulation, VertexElement<DIM,DIM>* pElement, unsigned localIndex);
 
     void InitializeShapeTensorOfCell(CellPtr pCell);
 
@@ -190,29 +177,10 @@ public:
     
     void UpdateGroupNumberOfCell(AbstractCellPopulation<DIM,DIM>& rCellPopulation, CellPtr pCell);
 
-    void SetupSolveForLamellipodiumInfoOfCells(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
-
-    void UpdateLamellipodiumInfoOfCells(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
-
     // feedback form:
     void SetConsiderFeedbackOfFaceValues(bool ifConsiderFeedbackOfFaceValues)
     {
       mIfConsiderFeedbackOfFaceValues = ifConsiderFeedbackOfFaceValues;
-    }
-
-    void SetConsiderFeedbackOfFaceValuesOnlyForBoundaryCells(bool ifConsiderFeedbackOfFaceValuesOnlyForBoundaryCells)
-    {
-      mIfConsiderFeedbackOfFaceValuesOnlyForBoundaryCells = ifConsiderFeedbackOfFaceValuesOnlyForBoundaryCells;
-    }
-
-    void SetConsiderFeedbackOfFaceValuesOnlyForTopBoundaryCells(bool ifConsiderFeedbackOfFaceValuesOnlyForTopBoundaryCells)
-    {
-      mIfConsiderFeedbackOfFaceValuesOnlyForTopBoundaryCells = ifConsiderFeedbackOfFaceValuesOnlyForTopBoundaryCells;
-    }
-
-    void SetApplyFeedbackOfFaceValuesToTopBoundaryCellsAndCellsAboveReservior(bool applyFeedbackOfFaceValuesToTopBoundaryCellsAndCellsAboveReservior)
-    {
-      mApplyFeedbackOfFaceValuesToTopBoundaryCellsAndCellsAboveReservior = applyFeedbackOfFaceValuesToTopBoundaryCellsAndCellsAboveReservior;
     }
 
     void SetStripWidth(double stripWidth)
@@ -251,31 +219,7 @@ public:
     }
 
     // if feedback includes only strengthening or not
-    void SetEMADontDecrease_CCADontDecrease_HasAThreshold_Threshold(
-        bool EMADontDecrease,
-        bool CCADontDecrease,
-        bool CCAIncreasingHasAThresholdOfEdgeLength,
-        double CCAIncreasingThresholdOfEdgeLengthPercentage)
-    {
-      mEMADontDecreaseWhenEdgeShrink = EMADontDecrease;
-      mCCADontDecreaseWhenEdgeExpand = CCADontDecrease;
-      mCCAIncreasingHasAThresholdOfEdgeLength = CCAIncreasingHasAThresholdOfEdgeLength;
-      mCCAIncreasingThresholdOfEdgeLengthPercentage = CCAIncreasingThresholdOfEdgeLengthPercentage;
-    }
-
-    void SetEMADontDecreaseBelowAThreshold_ThisThreshold(bool EMADontDecreaseBelowAThreshold, double EMADontDecreaseBelowThisThreshold)
-    {
-      mEMADontDecreaseBelowAThreshold = EMADontDecreaseBelowAThreshold;
-      mEMADontDecreaseBelowThisThreshold = EMADontDecreaseBelowThisThreshold;
-    }
-
-
     // detailed feedback information:
-    void SetEdgeLengthAtRest(double edgeLengthAtRest)
-    {
-      this->mEdgeLengthAtRest = edgeLengthAtRest;
-    }
-
     void SetKmForMyosinFeedback(double kmForMyosinFeedback)
     {
       mKmForMyosinFeedback = kmForMyosinFeedback;
@@ -306,15 +250,15 @@ public:
       mHillPowerForAdhesion = hillPowerForAdhesion;
     }
 
+    void SetReferenceStress(double referenceStress)
+    {
+      mReferenceStress = referenceStress;
+    }
+
     // stress state
     void SetCalculateStressStateBoolean(bool ifCalculateStressState)
     {
       mIfCalculateStressState = ifCalculateStressState;
-    }
-
-    void SetIfSetCellDataOfEachForceContributions(bool ifSetCellDataOfEachForceContributions)
-    {
-      mIfSetCellDataOfEachForceContributions = ifSetCellDataOfEachForceContributions;
     }
 
     void SetFixedTargetArea(double fixedTargetArea)
@@ -330,11 +274,6 @@ public:
     void SetFixedTargetPerimeter(double fixedTargetPerimeter)
     {
       this->mFixedTargetPerimeter = fixedTargetPerimeter;
-    }
-
-    void SetCaseNumberOfMembraneSurfaceEnergyForm(double caseNumberOfMembraneSurfaceEnergyForm)
-    {
-      this->mCaseNumberOfMembraneSurfaceEnergyForm = caseNumberOfMembraneSurfaceEnergyForm;
     }
 
     void SetNagaiHondaDeformationEnergyParameter(double nagaiHondaDeformationEnergyParameter)
@@ -357,15 +296,14 @@ public:
       this->mNagaiHondaCellBoundaryAdhesionEnergyParameter = nagaiHondaCellBoundaryAdhesionEnergyParameter;
     }
     
-    // cell division
-    void SetUseMyDivisionRuleAlongWithModifier(bool useMyDivisionRuleAlongWithModifier)
+    void SetChangedNagaiHondaMembraneSurfaceEnergyParameter(double changedNagaiHondaMembraneSurfaceEnergyParameter)
     {
-      mUseMyDivisionRuleAlongWithModifier = useMyDivisionRuleAlongWithModifier;
+      this->mChangedNagaiHondaMembraneSurfaceEnergyParameter = changedNagaiHondaMembraneSurfaceEnergyParameter;
     }
 
-    void SetDivisionTime(double divisionTime)
+    void SetChangedNagaiHondaCellCellAdhesionEnergyParameter(double changedNagaiHondaCellCellAdhesionEnergyParameter)
     {
-      mDivisionTime = divisionTime;
+      this->mChangedNagaiHondaCellCellAdhesionEnergyParameter = changedNagaiHondaCellCellAdhesionEnergyParameter;
     }
 
     // group number
@@ -406,25 +344,10 @@ public:
       mIfOutputModifierInformation = ifOutputModifierInformation;
     }
 
-    void SetHasMyosinActivityDepression(bool hasMyosinActivityDepression)
-    {
-      mHasMyosinActivityDepression = hasMyosinActivityDepression;
-    }
-
-    void SetMyosinActivityDepressedTime (double myosinActivityDepressedTime)
-    {
-      mMyosinActivityDepressedTime = myosinActivityDepressedTime;
-    }
-
-    void SetMyosinActivityDepressingRate (double myosinActivityDepressingRate)
-    {
-      mMyosinActivityDepressingRate = myosinActivityDepressingRate;
-    }
-
     // for changing feedback after a particulat time
-    void SetTimeForChangingFeedback(double timeForChangingFeedback)
+    void SetTimeForChanging(double timeForChanging)
     {
-      mTimeForChangingFeedback = timeForChangingFeedback;
+      mTimeForChanging = timeForChanging;
     }
 
     void SetChangedKmForMyosinFeedback(double changedKmForMyosinFeedback)
@@ -432,14 +355,14 @@ public:
       mChangedKmForMyosinFeedback = changedKmForMyosinFeedback;
     }
 
+    void SetChangedKsForAdhesionFeedback(double changedKsForAdhesionFeedback)
+    {
+      mChangedKsForAdhesionFeedback = changedKsForAdhesionFeedback;
+    }
+
     void SetChangedFeedbackRate(double changedFeedbackRate)
     {
       mChangedFeedbackRate = changedFeedbackRate;
-    }
-
-    void SetChangedMyosinActivityBaseValue(double changedMyosinActivityBaseValue)
-    {
-      mChangedMyosinActivityBaseValue = changedMyosinActivityBaseValue;
     }
 
     void SetSmallChangeForAreaCalculation(double smallChangeForAreaCalculation)   // change made by Chao
@@ -461,6 +384,17 @@ public:
     {
       mConsiderConsistencyForSSA = considerConsistencyForSSA;
     }
+
+    void SetIfEquilibrateForAWhile(bool ifEquilibrateForAWhile) // change made by Chao
+    {
+      mIfEquilibrateForAWhile = ifEquilibrateForAWhile;
+    }
+
+    void SetEndTimeForEquilibrium(double endTimeForEquilibrium)
+    {
+      mEndTimeForEquilibrium = endTimeForEquilibrium;
+    }
+
     /**
      * Overridden OutputSimulationModifierParameters() method.
      * Output any simulation modifier parameters to file.

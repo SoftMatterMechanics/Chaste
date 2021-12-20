@@ -62,6 +62,7 @@ class PolarityModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
         archive & boost::serialization::base_object<AbstractCellBasedSimulationModifier<DIM,DIM> >(*this);
         archive & mD;
         archive & mPolarityMagnitude;
+        archive & mPolarityMagnitudeEquilibrium;
     }
 
 protected:
@@ -70,13 +71,13 @@ protected:
 
     double mPolarityMagnitude;
 
+    double mPolarityMagnitudeEquilibrium;
+
     double mAngleForInitialization;
 
     bool mSeedManually;
 
     unsigned mSeedForInitialRandomPolarity;
-
-    double mPolarityMagnitudeEquilibrium;    
 
 public:
 

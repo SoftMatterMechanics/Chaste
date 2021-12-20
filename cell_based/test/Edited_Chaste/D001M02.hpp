@@ -95,7 +95,7 @@ public:
         if  (if_use_larger_strip_distance)
             num_ele_cross = (unsigned)round(num_ele_cross*strip_dis_multiplier);
 
-        unsigned num_ele_up = 8;
+        unsigned num_ele_up = 16;
         if  (use_longer_mesh)
             num_ele_up *= num_ele_up_multiplier;
 

@@ -42,6 +42,7 @@ PolarityModifier<DIM>::PolarityModifier()
     : AbstractCellBasedSimulationModifier<DIM>(),
       mD(0.1),
       mPolarityMagnitude(0.1),
+      mPolarityMagnitudeEquilibrium(0.1),
       mAngleForInitialization(M_PI),
       mSeedManually(false),
       mSeedForInitialRandomPolarity(0u)
@@ -74,16 +75,20 @@ void PolarityModifier<DIM>::InitializePolarityOfCells(AbstractCellPopulation<DIM
 {
     srand((unsigned)time(NULL));// if srand() used in main time loop, we may not need it here. Try later!
     if (mSeedManually)
-        srand(mSeedForInitialRandomPolarity);
+    {
+        // srand(mSeedForInitialRandomPolarity);
+        RandomNumberGenerator::Instance()->Reseed(mSeedForInitialRandomPolarity);
+    }    
+
     for (std::list<CellPtr>::iterator cell_iter = rCellPopulation.rGetCells().begin();
          cell_iter != rCellPopulation.rGetCells().end();
          ++cell_iter)
     {
-        double angle = mAngleForInitialization; //angle: 0-PI
-        double polarity_angle = (rand()%int(round((M_PI+angle)*1e5)))/1e5-0.5*angle;// Err: 0-PI-->>(0-x)-(PI+x)
-        polarity_angle = 2*M_PI*RandomNumberGenerator::Instance()->ranf();
-        if (mSeedManually)
-            polarity_angle = 2*M_PI* (rand()%int(1e5))/double(1e5);
+        // double angle = mAngleForInitialization; //angle: 0-PI
+        // double polarity_angle = (rand()%int(round((M_PI+angle)*1e5)))/1e5-0.5*angle;// Err: 0-PI-->>(0-x)-(PI+x)
+        double polarity_angle = 2*M_PI*RandomNumberGenerator::Instance()->ranf();
+        // if (mSeedManually)
+        //     polarity_angle = 2*M_PI* (rand()%int(1e5))/double(1e5);
         SetPolarityOfCell(*cell_iter, polarity_angle, mPolarityMagnitude, mPolarityMagnitudeEquilibrium);
     }
 }
@@ -114,7 +119,6 @@ void PolarityModifier<DIM>::SetPolarityOfCell(CellPtr pCell, double polarityAngl
     pCell->GetCellData()->SetItem("PolarityMagnitude", polarityMagnitude);
     pCell->GetCellData()->SetItem("PolarityMagnitudeEquilibrium", polarityMagnitudeEquilibrium);
 }
-
 
 template<unsigned DIM>
 void PolarityModifier<DIM>::OutputSimulationModifierParameters(out_stream& rParamsFile)

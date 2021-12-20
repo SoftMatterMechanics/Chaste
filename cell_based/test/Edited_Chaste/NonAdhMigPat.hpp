@@ -78,9 +78,9 @@ public:
         double target_shape_index = 4.0;//p0
         double reference_area = M_PI;
         double initial_area = reference_area;
-        bool   is_default_feedback_form = false;
+        bool   is_default_feedback_form = true;
 
-/* Strip Structure & Cell Mesh */
+        /* Strip Structure & Cell Mesh */
         bool   strip_width_doubled_for_multiple_leading_cells = false;
         double strip_width_mutiple = 8.0;
       //  double strip_width_multiple_for_sliding = 15.0;
@@ -89,13 +89,13 @@ public:
         bool   use_longer_mesh = false; // for (num_ele_up) mesh
         int    num_ele_up_multiplier = 2;
         int    move_mesh_right_for_N_periods = 0; // for display of multiple periods
-        bool   one_strip_only_in_a_period = true;
+        bool   one_period_only = true;
 
         unsigned num_ele_cross = 6; // must be even number
         if  (if_use_larger_strip_distance)
             num_ele_cross = (unsigned)round(num_ele_cross*strip_dis_multiplier);
 
-        unsigned num_ele_up = 8;
+        unsigned num_ele_up = 16;
         if  (use_longer_mesh)
             num_ele_up *= num_ele_up_multiplier;
 
@@ -118,18 +118,18 @@ public:
         double strip_start_y_location = 1.5*num_ele_up*1/sqrt(3)*sqrt(initial_area/(sqrt(3)/2));
 
         /* Energy equation form: 1/2*KA*(A-A0)^2 + 1/2*Gamma*P^2 + 1.0*Lambda*P - alpha*Sa. ( Lambda=-Ga*P0, p0=P0/sqrt(A0) ) */
-/* 1. Area expansion resistance */
+        /* 1. Area expansion resistance */
         double nagai_honda_deformation_energy_parameter = 1; // KA
         bool   use_fixed_target_area_without_modifier = true; // A0:
 
-/* 2. Myosin activity */
+        /* 2. Myosin activity */
         double nagai_honda_membrane_surface_energy_parameter = 0.2/(M_PI/reference_area);//Gamma
         double edge_length_at_rest = sqrt(initial_area/(6*sqrt(3)/4)); // = 1.0996
 
         bool   if_consider_feedback_of_face_values = true;
         double Km_for_myosin_feedback = 1.0; // 1.0 for defaut
 //?        double feedback_rate_for_myosin_activity = 0.00*400*0.01125/(M_PI/reference_area);//beta
-        double feedback_rate_for_myosin_activity = 0.01/(M_PI/reference_area);//beta
+        double feedback_rate_for_myosin_activity = 0.1/(M_PI/reference_area);//beta
         double hill_power_for_myosin_activity = 8.0; // 8.0 for default
 
         bool   if_apply_feedback_of_face_values_only_for_boundary_cells = false; // for testing fluid inside
@@ -138,7 +138,7 @@ public:
 
         // change feedback after a time.
         double time_for_changing_feedback = DOUBLE_UNSET; // 100.0; // DOUBLE_UNSET;
-        double changed_Km_for_myosin_feedback = 0.5;
+        double changed_Km_for_myosin_feedback = 1.0;
         double changed_feedback_rate = feedback_rate_for_myosin_activity;
         double changed_myosin_activity_base_value = 1; // myosin_activity_base_value = 1 by default
 
@@ -149,32 +149,34 @@ public:
         bool   has_myo_depression = false;
         double myosin_activity_depressing_rate = 0.05/(M_PI/reference_area);
 
-/* 3. Cell-Cell adhesion */
+        /* 3. Cell-Cell adhesion */
         double cell_cell_adhesion_parameter = -nagai_honda_membrane_surface_energy_parameter*(target_shape_index*sqrt(reference_area));
         double cell_boundary_adhesion_parameter = 0.0; // cell-cell adhesion at boundary
         
         bool   if_consider_feedback_of_cell_cell_adhesion = true;
-        double Ks_for_adhesion_feedback = 1.0; // 1.0 for defaut
-        double feedback_rate_for_adhesion = 0.01;
+        double Ks_for_adhesion_feedback = 0.5; // 1.0 for defaut
+        double feedback_rate_for_adhesion = 0.1;
         double hill_power_for_adhesion = 8.0;
         bool   CCA_dont_decrease = false;
         bool   CCA_increasing_has_a_threshold_of_edge_length = false;
         double CCA_increasing_threshold_of_edge_length_percentage = 0.5;
 
-/* 4. Substrate Ahesion */
+        /* 4. Substrate Ahesion */
         bool   if_ignore_reservoir_substrate_adhesion_at_top = false;// false for default
         bool   if_ignore_reservoir_substrate_adhesion_at_bottom = false;// false for default 
-        bool   if_consider_strip_substrate_adhesion = true;
-        bool   if_consider_reservoir_substrate_adhesion = true;// true for default
+        bool   if_consider_substrate_adhesion = true;
+        bool   if_consider_reservoir_substrate_adhesion = true && if_consider_substrate_adhesion;// true for default
+        if  (!if_consider_substrate_adhesion)
+            assert(if_consider_reservoir_substrate_adhesion == false);
 
         double basic_SSA = -1.0/(M_PI/reference_area);
         double SSA_for_mature_lamellipodium = -10.0/(M_PI/reference_area);
-        double reservoir_substrate_adhesion_parameter = 2.0*basic_SSA;
-        double homogeneous_substrate_adhesion_parameter = 2.0*basic_SSA;
+        double reservoir_substrate_adhesion_parameter = basic_SSA;
+        double homogeneous_substrate_adhesion_parameter = 1.0*basic_SSA;
         
           // Strip substrate adhesion form:
         bool   consider_consistency_for_SSA = true;
-        bool   if_strip_substrate_adhesion_is_homogeneous = true;
+        bool   if_substrate_adhesion_is_homogeneous = true;
           // some basic mechanisms:
         bool   classify_elements_with_group_numbers = true;
         bool   mark_leading_cells = true;
@@ -185,7 +187,7 @@ public:
         double sampling_time = 1.0*(M_PI/reference_area);
         double small_change_for_area_calculation = 0.1/sqrt((M_PI/reference_area));
         
-/* 5. Pulling Force */
+        /* 5. Pulling Force */
         // Note that pulling force is realized by different ways for epithelial bridge and vortex formation
         // epithelial bridge: pulling force is directly applied on the nodes of leading cells
         // vortex formation: pulling force is treated equivalently by larger substrate adhesion on strip 
@@ -193,7 +195,7 @@ public:
         unsigned leading_cell_number = 1;
         if (!multiple_leading_cells)
            leading_cell_number = 1;
-        double pulling_force_on_leading_cell = 2.0*12/pow((M_PI/reference_area),1.5);// Fy
+        double pulling_force_on_leading_cell = 1.0*12/pow((M_PI/reference_area),1.5);// Fy
           // homogeneous SSA case:
         bool   add_pulling_force_on_node_individually = false;
         bool   add_pulling_force_evenly_on_nodes_of_leading_cell = true;
@@ -221,9 +223,9 @@ public:
            assert(use_new_SSA_distribution_rule);
         
           // Strip substrate adhesion (SSA):
-        assert( !(if_strip_substrate_adhesion_is_homogeneous && (use_my_detach_pattern_method||use_new_SSA_distribution_rule) ) );
+        assert( !(if_substrate_adhesion_is_homogeneous && (use_my_detach_pattern_method||use_new_SSA_distribution_rule) ) );
         assert( !(use_new_SSA_distribution_rule && use_my_detach_pattern_method) );        
-/* 6. Random force */
+      /* 6. Random force */
         bool   add_random_force = true;
 
         // Brownian random force
@@ -246,18 +248,17 @@ public:
         if (polarity_magnitude!=0.0)
            assert(add_random_force == true);
 
-/* 7. Cell division */
+        /* 7. Cell division */
         bool   run_with_birth = false;
         double time_for_one_division_of_cell_population = 25*(M_PI/reference_area);
         double growth_rate_for_target_area_after_division = 0.1/(M_PI/reference_area);
         bool   use_my_division_rule_along_with_modifier = true;
 
-/* 8. Time */
-        double end_time_for_equilibrium = 0.0;
+        /* 8. Time */
+        double time_for_equilibrium = 0.0;
         bool   if_equilibrate_for_a_while = true;
-        if (end_time_for_equilibrium <= 0.0)
+        if (time_for_equilibrium == 0.0)
            if_equilibrate_for_a_while = false;
-        double polarity_magnitude_equilibrium = 0.2;
         
         double dt = 0.25*0.1*(M_PI/reference_area);
         double end_time = 400.0*(M_PI/reference_area);
@@ -268,10 +269,10 @@ public:
         if (apply_my_change_to_make_timestep_adaptive)
            assert(restrict_vertex_movement == false);
 
-/* 9. Cell rearrangement */
+        /* 9. Cell rearrangement */
         double set_cell_rearrangement_threshold = 0.01/sqrt((M_PI/reference_area)); // the minimum threshold distance for element T1 rearrangement 
 
-/* 10. Output & display */
+        /* 10. Output & display */
         bool   output_concise_swap_information_when_remesh = false;
         bool   output_detailed_swap_information_when_remesh = false;
         bool   output_numerical_method_information = false;
@@ -369,9 +370,10 @@ public:
         p_force->SetUseFixedTargetArea(use_fixed_target_area_without_modifier); // used in the case where there is no target area modifier! (no division)
         p_force->SetFixedTargetArea(reference_area);
         p_force->SetTargetShapeIndex(target_shape_index);
+          // substrate adhesion info
+        p_force->SetIfConsiderSubstrateAdhesion(if_consider_substrate_adhesion);
           // Strip Substrate Adhesion
-        p_force->SetIfConsiderStripSubstrateAdhesion(if_consider_strip_substrate_adhesion);
-        p_force->SetIfStripSubstrateAdhesionIsHomogeneous(if_strip_substrate_adhesion_is_homogeneous);
+        p_force->SetIfSubstrateAdhesionIsHomogeneous(if_substrate_adhesion_is_homogeneous);
         p_force->SetHomogeneousSubstrateAdhesionParameter(homogeneous_substrate_adhesion_parameter);
         p_force->SetAddPullingForceOnNodeIndividually(add_pulling_force_on_node_individually);
         p_force->SetAddPullingForceEvenlyOnNodesOfLeadingCell(add_pulling_force_evenly_on_nodes_of_leading_cell);
@@ -408,7 +410,7 @@ public:
         p_force->SetSlowlyMovingForwardAfterThisHeight(slowly_moving_forward_after_this_height);
 
         p_force->SetIfEquilibrateForAWhile(if_equilibrate_for_a_while);
-        p_force->SetEndTimeForEquilibrium(end_time_for_equilibrium);
+        p_force->SetTimeForEquilibrium(time_for_equilibrium);
 
         p_force->SetOutputInformationForNagaiHondaForce(output_information_for_nagai_honda_force);
         simulator.AddForce(p_force);
@@ -432,10 +434,10 @@ public:
           p_force2->SetUseTheSameNodeRadius(use_the_same_node_radius);
           p_force2->SetTheSameNodeRadius(node_radius);
           p_force2->SetHasPolarity(has_polarity);
-          p_force2->SetOnePeriodOnly(one_strip_only_in_a_period);
+          p_force2->SetOnePeriodOnly(one_period_only);
 
           p_force2->SetIfEquilibrateForAWhile(if_equilibrate_for_a_while);
-          p_force2->SetEndTimeForEquilibrium(end_time_for_equilibrium);
+          p_force2->SetTimeForEquilibrium(time_for_equilibrium);
 
           simulator.AddForce(p_force2);
         }
@@ -445,7 +447,6 @@ public:
         {
           MAKE_PTR_ARGS(PolarityModifier<2>, p_polarity_modifier, ());
           p_polarity_modifier->SetPolarityMagnitude(polarity_magnitude);
-          p_polarity_modifier->SetPolarityMagnitudeEquilibrium(polarity_magnitude_equilibrium);
           p_polarity_modifier->SetSeedManually(seed_manually);
           p_polarity_modifier->SetSeedForInitialRandomPolarity(seed_for_initial_random_polarity);
           p_polarity_modifier->SetD(rotational_diffusion_constant);
@@ -500,7 +501,7 @@ public:
         p_face_value_and_stress_state_modifier->SetHillPowerForAdhesion(hill_power_for_adhesion);
 
         // changed feedback
-        p_face_value_and_stress_state_modifier->SetTimeForChangingFeedback(time_for_changing_feedback);
+        p_face_value_and_stress_state_modifier->SetTimeForChanging(time_for_changing_feedback);
         p_face_value_and_stress_state_modifier->SetChangedKmForMyosinFeedback(changed_Km_for_myosin_feedback);
         p_face_value_and_stress_state_modifier->SetChangedFeedbackRate(changed_feedback_rate);
         p_face_value_and_stress_state_modifier->SetChangedMyosinActivityBaseValue(changed_myosin_activity_base_value);
@@ -575,15 +576,7 @@ public:
         normal(1) = -1.0;
         double stop_time = DOUBLE_UNSET;
         MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc, (&cell_population, point, normal, stop_time));
-        c_vector<double,2> point2 = zero_vector<double>(2);
-        c_vector<double,2> normal2 = zero_vector<double>(2);
-        point2(1) = strip_start_y_location;
-        normal2(1) = 1.0;
-        double stop_time2 = end_time_for_equilibrium;
-        MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc2, (&cell_population, point2, normal2, stop_time2));
         simulator.AddCellPopulationBoundaryCondition(p_bc);
-        simulator.AddCellPopulationBoundaryCondition(p_bc2);
-
         /*--------------------------------END: Boundary condition-----------------------------*/
         
 
@@ -600,7 +593,7 @@ public:
         output_directory += oss.str();
 
         oss.str("");
-        if (if_strip_substrate_adhesion_is_homogeneous)
+        if (if_substrate_adhesion_is_homogeneous)
         {
           if (add_pulling_force_on_node_individually)
             oss << "Fy_lead_node=" << std::fixed << setprecision(1) << pulling_force_on_leading_cell;
@@ -634,7 +627,7 @@ public:
 
         if(if_check_for_T4_swaps)
           oss << "_T4swaps=1";
-        if (if_strip_substrate_adhesion_is_homogeneous)
+        if (if_substrate_adhesion_is_homogeneous)
           oss << "_HomoSSA=" << std::fixed << setprecision(1) << homogeneous_substrate_adhesion_parameter;
         else
         {
@@ -685,7 +678,7 @@ public:
           oss << ((max_movement_per_timestep>=0.01)? std::fixed : std::scientific) << setprecision(2) << max_movement_per_timestep;
           output_directory += "_MaxMvDt=" + oss.str();
         }
-        if (if_consider_strip_substrate_adhesion)
+        if (if_consider_substrate_adhesion)
         {
           oss.str("");
           oss << ((small_change_for_area_calculation>=0.01)? std::fixed : std::scientific) << setprecision(2) << small_change_for_area_calculation;
@@ -720,15 +713,15 @@ public:
         oss << ((fabs(cell_boundary_adhesion_parameter)>=0.01)? std::fixed : std::scientific) << setprecision(2) << cell_boundary_adhesion_parameter;
         output_directory += "_CBAdhe=" + oss.str();
         
-        output_directory += "_|HasSSA=" + std::to_string(if_consider_strip_substrate_adhesion);
-        if (if_consider_strip_substrate_adhesion)
+        output_directory += "_|HasSubAdh=" + std::to_string(if_consider_substrate_adhesion);
+        if (if_consider_substrate_adhesion)
         {
-          if (if_strip_substrate_adhesion_is_homogeneous)
+          if (if_substrate_adhesion_is_homogeneous)
             output_directory += "_SSAIsHomo";
           else
-            output_directory += "_NonHomoSSA";
+            output_directory += "_NonHomoSSA";       
+          output_directory += "_HasRSA=" + std::to_string(if_consider_reservoir_substrate_adhesion);
         }
-        output_directory += "_HasRSA=" + std::to_string(if_consider_reservoir_substrate_adhesion);
         
         // Detailed information  written to directoory.
         output_directory += "/";
@@ -821,9 +814,9 @@ public:
           }
         }   
 
-        if(if_consider_strip_substrate_adhesion)
+        if(if_consider_substrate_adhesion)
         {
-          if (if_strip_substrate_adhesion_is_homogeneous)
+          if (if_substrate_adhesion_is_homogeneous)
           {
             oss.str("");
             oss << std::fixed << setprecision(1) << homogeneous_substrate_adhesion_parameter;
@@ -841,18 +834,18 @@ public:
             oss << std::fixed << setprecision(1) << basic_SSA;
             output_directory += "_basic=" + oss.str();
           }
-        }
-        if(if_consider_reservoir_substrate_adhesion)
-        {
-          oss.str("");
-          oss << std::fixed << setprecision(1) << reservoir_substrate_adhesion_parameter;
-          output_directory += "_RSA=" + oss.str();
-          if (if_ignore_reservoir_substrate_adhesion_at_top)
-            output_directory += "_ConsiRSATop=0";
-          if (if_ignore_reservoir_substrate_adhesion_at_bottom)
-            output_directory += "_ConsiRSABott=0";
-        }
+          if(if_consider_reservoir_substrate_adhesion)
+          {
+            oss.str("");
+            oss << std::fixed << setprecision(1) << reservoir_substrate_adhesion_parameter;
+            output_directory += "_RSA=" + oss.str();
+            if (if_ignore_reservoir_substrate_adhesion_at_top)
+              output_directory += "_ConsiRSATop=0";
+            if (if_ignore_reservoir_substrate_adhesion_at_bottom)
+              output_directory += "_ConsiRSABott=0";
 
+          }
+        }
 
         // tmp
         if (small_SSA_at_first)
@@ -860,13 +853,6 @@ public:
           oss.str("");
           oss << "Small_SSA_mature_lame=" << std::fixed << setprecision(1) << small_SSA_for_initial_time 
               << "_for_initial_time=" << std::fixed << setprecision(1) << initial_time_for_small_SSA; 
-          output_directory += oss.str();
-        }
-
-        if (if_equilibrate_for_a_while)
-        {
-          oss.str("");
-          oss << "End_time_equilib=" << std::fixed << setprecision(1) << end_time_for_equilibrium;
           output_directory += oss.str();
         }
 

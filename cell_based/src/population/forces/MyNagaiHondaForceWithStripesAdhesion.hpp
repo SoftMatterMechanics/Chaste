@@ -108,27 +108,23 @@ protected:
     double mNagaiHondaCellBoundaryAdhesionEnergyParameter;
 
     // my changes:
-    bool   mIfConsiderStripSubstrateAdhesion;
+    double mTimeForChanging;
 
-    bool   mIfStripSubstrateAdhesionIsHomogeneous;
+    double mChangedNagaiHondaMembraneSurfaceEnergyParameter;
+
+    double mChangedNagaiHondaCellCellAdhesionEnergyParameter;
+
+    bool   mIfConsiderSubstrateAdhesion;
+
+    bool   mIfSubstrateAdhesionIsHomogeneous;
 
     double mSubstrateAdhesionParameterChangePerUnitLength;
 
     double mHomogeneousSubstrateAdhesionParameter;
-    
-    double mSubstrateAdhesionLeadingTopLength;
-
-    double mBasicSSA;
-
-    double mSSAForMatureLamellipodium;
 
     bool   mIfConsiderReservoirSubstrateAdhesion;
 
     double mReservoirSubstrateAdhesionParameter;
-
-    bool   mIfIgnoreReservoirSubstrateAdhesionAtTop;
-
-    bool   mIfIgnoreReservoirSubstrateAdhesionAtBottom;
     
     double mStripWidth;
 
@@ -152,8 +148,6 @@ protected:
 
     bool   mUseFixedTargetArea;
 
-    unsigned mCaseNumberOfMembraneSurfaceEnergyForm;
-
     bool   mIfUseFaceElementToGetAdhesionParameter;
 
     bool   mOutputInformationForNagaiHondaForce;
@@ -161,12 +155,6 @@ protected:
     bool   mConsiderConsistencyForSSA;
 
     double mSmallChangeForAreaCalculation;
-
-    bool   mUseMyDetachPatternMethod;
-
-    bool   mIfUseNewSSADistributionRule;
-
-    bool   mSSAStrengthenedOnlyInYDirection;
 
     bool   mAddPullingForceOnNodeIndividually;
 
@@ -176,21 +164,9 @@ protected:
 
     double mPullingForceOnLeadingCell;
 
-    bool   mKeepMovingForward;
-
-    double mSSABottomDecrease;
-
-    double mSlowlyMovingForwardAfterThisHeight;
-
-    bool   mSmallSSAAtFirst;
-
-    double mInitialTimeForSmallSSA;
-
-    double mSmallSSAForInitialTime;
-
     bool   mIfEquilibrateForAWhile;
 
-    double mEndTimeForEquilibrium;
+    double mTimeForEquilibrium;
 
 public:
 
@@ -275,6 +251,21 @@ public:
     void SetNagaiHondaCellBoundaryAdhesionEnergyParameter(double nagaiHondaCellBoundaryAdhesionEnergyParameter);
 
     /**
+     * Set mNagaiHondaMembraneSurfaceEnergyParameter.
+     *
+     * @param changedNagaiHondaMembraneSurfaceEnergyParameter the new value of mNagaiHondaMembraneSurfaceEnergyParameter
+     */
+    void SetChangedNagaiHondaMembraneSurfaceEnergyParameter(double changedNagaiHondaMembraneSurfaceEnergyParameter);
+
+    /**
+     * Set mNagaiHondaCellCellAdhesionEnergyParameter. This parameter corresponds to 1/2 of the sigma parameter in the forces by
+     * Nagai et al. (2007).
+     *
+     * @param changedNagaiHondaCellCellAdhesionEnergyEnergyParameter the new value of mNagaiHondaCellCellAdhesionEnergyParameter
+     */
+    void SetChangedNagaiHondaCellCellAdhesionEnergyParameter(double changedNagaiHondaCellCellAdhesionEnergyEnergyParameter);
+
+    /**
      * Overridden OutputForceParameters() method.
      *
      * @param rParamsFile the file stream to which the parameters are output
@@ -282,6 +273,15 @@ public:
     void OutputForceParameters(out_stream& rParamsFile);
 
     // my methods
+    c_vector<double, DIM> GetStripSubstrateAdhesionAreaGradientOfElementAtNode(AbstractCellPopulation<DIM>& rCellPopulation, VertexElement<DIM, DIM>* pElement, unsigned localIndex);
+
+    c_vector<double, DIM> GetReservoirSubstrateAdhesionAreaGradientOfElementAtNode(AbstractCellPopulation<DIM>& rCellPopulation, VertexElement<DIM,DIM>* pElement, unsigned localIndex);
+
+    void SetTimeForChanging(double timeForChanging)
+    {
+      mTimeForChanging = timeForChanging;
+    }
+
     void SetStripWidth(double stripWidth)
     {
       mStripWidth = stripWidth;
@@ -330,15 +330,15 @@ public:
     {
       mIfConsiderIntervalSubstrateRepulsion = ifConsiderIntervalSubstrateRepulsion;
     }
-    void SetIfConsiderStripSubstrateAdhesion (bool ifConsiderStripSubstrateAdhesion)
+    void SetIfConsiderSubstrateAdhesion (bool ifConsiderSubstrateAdhesion)
     {
-      mIfConsiderStripSubstrateAdhesion = ifConsiderStripSubstrateAdhesion;
+      mIfConsiderSubstrateAdhesion = ifConsiderSubstrateAdhesion;
     }
 
     // SSA
-    void SetIfStripSubstrateAdhesionIsHomogeneous(bool IfStripSubstrateAdhesionIsHomogeneous)
+    void SetIfSubstrateAdhesionIsHomogeneous(bool ifSubstrateAdhesionIsHomogeneous)
     {
-      mIfStripSubstrateAdhesionIsHomogeneous = IfStripSubstrateAdhesionIsHomogeneous;
+      mIfSubstrateAdhesionIsHomogeneous = ifSubstrateAdhesionIsHomogeneous;
     }
     void SetHomogeneousSubstrateAdhesionParameter(double homogeneousSubstrateAdhesionParameter)
     {
@@ -347,18 +347,6 @@ public:
     void SetSubstrateAdhesionParameterChangePerUnitLength(double substrateAdhesionParameterChangePerUnitLength)
     {
       mSubstrateAdhesionParameterChangePerUnitLength = substrateAdhesionParameterChangePerUnitLength;
-    }
-    void SetSubstrateAdhesionLeadingTopLength( double substrateAdhesionLeadingTopLength)
-    {
-      mSubstrateAdhesionLeadingTopLength = substrateAdhesionLeadingTopLength;
-    }
-    void SetBasicSSA(double basicSSA)
-    {
-      mBasicSSA = basicSSA;
-    }
-    void SetSSAForMatureLamellipodium(double SSAForMatureLamellipodium)
-    {
-      mSSAForMatureLamellipodium = SSAForMatureLamellipodium;
     }
 
     // RSA
@@ -369,24 +357,6 @@ public:
     void SetReservoirSubstrateAdhesionParameter (double reservoirSubstrateAdhesionParameter)
     {
       mReservoirSubstrateAdhesionParameter = reservoirSubstrateAdhesionParameter;
-    }
-    void SetIfIgnoreReservoirSubstrateAdhesionAtTop (bool ifIgnoreReservoirSubstrateAdhesionAtTop)
-    {
-      mIfIgnoreReservoirSubstrateAdhesionAtTop = ifIgnoreReservoirSubstrateAdhesionAtTop;
-    }
-    void SetIfIgnoreReservoirSubstrateAdhesionAtBottom (bool ifIgnoreReservoirSubstrateAdhesionAtBottom)
-    {
-      mIfIgnoreReservoirSubstrateAdhesionAtBottom = ifIgnoreReservoirSubstrateAdhesionAtBottom;
-    }
-
-    void SetCaseNumberOfMembraneSurfaceEnergyForm ( unsigned caseNumberOfMembraneSurfaceEnergyForm)
-    {
-      this->mCaseNumberOfMembraneSurfaceEnergyForm = caseNumberOfMembraneSurfaceEnergyForm;
-    }
-
-    unsigned GetCaseNumberOfMembraneSurfaceEnergyForm()
-    {
-      return this->mCaseNumberOfMembraneSurfaceEnergyForm;
     }
 
     void SetUseFaceElementToGetAdhesionParameterBoolean(bool ifUseFaceElementToGetAdhesionParameter)
@@ -409,21 +379,6 @@ public:
       mSmallChangeForAreaCalculation = smallChangeForAreaCalculation;
     }
 
-    void SetUseMyDetachPatternMethod(bool useMyDetachPatternMethod)
-    {
-      mUseMyDetachPatternMethod = useMyDetachPatternMethod;
-    }
-
-    void SetIfUseNewSSADistributionRule(bool ifUseNewSSADistributionRule)
-    {
-      mIfUseNewSSADistributionRule = ifUseNewSSADistributionRule;
-    }
-
-    void SetSSAStrengthenedOnlyInYDirection(bool SSAStrengthenedOnlyInYDirection)
-    {
-      mSSAStrengthenedOnlyInYDirection = SSAStrengthenedOnlyInYDirection;
-    }
-
     void SetAddPullingForceOnNodeIndividually(bool addPullingForceOnNodeIndividually)
     {
       mAddPullingForceOnNodeIndividually = addPullingForceOnNodeIndividually;
@@ -443,45 +398,15 @@ public:
     {
       mPullingForceOnLeadingCell = pullingForceOnLeadingCell;
     }
-    
-    void SetKeepMovingForward(bool keepMovingForward)
-    {
-      mKeepMovingForward = keepMovingForward;
-    }
-
-    void SetSSABottomDecrease(double SSABottomDecrease)
-    {
-      mSSABottomDecrease = SSABottomDecrease;
-    }
-
-    void SetSlowlyMovingForwardAfterThisHeight(double slowlyMovingForwardAfterThisHeight)
-    {
-      mSlowlyMovingForwardAfterThisHeight = slowlyMovingForwardAfterThisHeight;
-    }
-
-    void SetSmallSSAAtFirst(bool smallSSAAtFirst)
-    {
-      mSmallSSAAtFirst = smallSSAAtFirst;
-    }
-
-    void SetInitialTimeForSmallSSA(double initialTimeForSmallSSA)
-    {
-      mInitialTimeForSmallSSA = initialTimeForSmallSSA;
-    }
-
-    void SetSmallSSAForInitialTime(double smallSSAForInitialTime)
-    {
-      mSmallSSAForInitialTime = smallSSAForInitialTime;
-    }
 
     void SetIfEquilibrateForAWhile(bool ifEquilibrateForAWhile)
     {
       mIfEquilibrateForAWhile = ifEquilibrateForAWhile;
     }
 
-    void SetEndTimeForEquilibrium(double endTimeForEquilibrium)
+    void SetTimeForEquilibrium(double timeForEquilibrium)
     {
-      mEndTimeForEquilibrium = endTimeForEquilibrium;
+      mTimeForEquilibrium = timeForEquilibrium;
     }
 
 };

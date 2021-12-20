@@ -60,8 +60,7 @@ Cell::Cell(boost::shared_ptr<AbstractCellProperty> pMutationState,
       mIsDead(false),
       mIsLogged(false),
       // My changes
-      mMyosinActivity(1.0),
-      mUseMyDivisionRuleAlongWithModifier(false)
+      mMyosinActivity(1.0)
 
 
 {
@@ -455,12 +454,6 @@ bool Cell::ReadyToDivide()
         return false;
     }
 
-    // my changes
-    if (mUseMyDivisionRuleAlongWithModifier)
-    {
-        return mCanDivide;
-    }
-
     // NOTE - we run the SRN model here first before the CCM
     mpSrnModel->SimulateToCurrentTime();
     // This in turn runs any simulations within the CCM through ReadyToDivide();
@@ -478,12 +471,9 @@ CellPtr Cell::Divide()
     assert(mCanDivide);
     mCanDivide = false;
 
-    if (!mUseMyDivisionRuleAlongWithModifier)
-    {
-        // Reset properties of parent cell
-        mpCellCycleModel->ResetForDivision();
-        mpSrnModel->ResetForDivision();
-    }
+    // Reset properties of parent cell
+    mpCellCycleModel->ResetForDivision();
+    mpSrnModel->ResetForDivision();
 
     // Create copy of cell property collection to modify for daughter cell
     CellPropertyCollection daughter_property_collection = mCellPropertyCollection;
@@ -526,13 +516,7 @@ CellPtr Cell::Divide()
 
     // my changes
     p_new_cell->SetMyosinActivity(mMyosinActivity);
-    p_new_cell->SetUseMyDivisionRuleAlongWithModifier(mUseMyDivisionRuleAlongWithModifier);
 
-    if (mUseMyDivisionRuleAlongWithModifier)
-    {
-        this->GetCellData()->SetItem("target area", 0.5*this->GetCellData()->GetItem("target area"));
-        p_new_cell->GetCellData()->SetItem("target area", 0.5*p_new_cell->GetCellData()->GetItem("target area"));
-    }
     //tmp
     // std::cout << std::endl << "TargetAreaOfNewCell:" << p_new_cell->GetCellData()->GetItem("target area") << std::endl;
     // std::cout << std::endl << "Cell::Divide() finished!" << std::endl;

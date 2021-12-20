@@ -56,7 +56,6 @@ MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::MutableVertexMesh(std::vector<Node<SP
           mRosetteResolutionProbabilityPerTimestep(rosetteResolutionProbabilityPerTimestep),
           mCheckForInternalIntersections(false),
           mDistanceForT3SwapChecking(5.0),
-          mMultiplyResultsBy(1.0),
           mMoveMeshRightForNPeriods(0),
           mIfUpdateFaceElementsInMesh(false),
           mOutputConciseSwapInformationWhenRemesh(false),
