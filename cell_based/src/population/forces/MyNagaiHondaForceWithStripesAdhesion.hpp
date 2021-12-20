@@ -108,6 +108,11 @@ protected:
     double mNagaiHondaCellBoundaryAdhesionEnergyParameter;
 
     // my changes:
+
+    double mChangedNagaiHondaMembraneSurfaceEnergyParameter;
+
+    double mChangedNagaiHondaCellCellAdhesionEnergyParameter;
+
     bool   mIfConsiderStripSubstrateAdhesion;
 
     bool   mIfStripSubstrateAdhesionIsHomogeneous;
@@ -192,6 +197,8 @@ protected:
 
     double mEndTimeForEquilibrium;
 
+    double mTimeForChanging;
+
 public:
 
     /**
@@ -273,6 +280,21 @@ public:
      * @param nagaiHondaCellBoundaryAdhesionEnergyParameter the new value of mNagaiHondaCellBoundaryAdhesionEnergyParameter
      */
     void SetNagaiHondaCellBoundaryAdhesionEnergyParameter(double nagaiHondaCellBoundaryAdhesionEnergyParameter);
+
+    /**
+     * Set mNagaiHondaMembraneSurfaceEnergyParameter.
+     *
+     * @param changedNagaiHondaMembraneSurfaceEnergyParameter the new value of mNagaiHondaMembraneSurfaceEnergyParameter
+     */
+    void SetChangedNagaiHondaMembraneSurfaceEnergyParameter(double changedNagaiHondaMembraneSurfaceEnergyParameter);
+
+    /**
+     * Set mNagaiHondaCellCellAdhesionEnergyParameter. This parameter corresponds to 1/2 of the sigma parameter in the forces by
+     * Nagai et al. (2007).
+     *
+     * @param changedNagaiHondaCellCellAdhesionEnergyEnergyParameter the new value of mNagaiHondaCellCellAdhesionEnergyParameter
+     */
+    void SetChangedNagaiHondaCellCellAdhesionEnergyParameter(double changedNagaiHondaCellCellAdhesionEnergyEnergyParameter);
 
     /**
      * Overridden OutputForceParameters() method.
@@ -484,6 +506,10 @@ public:
       mEndTimeForEquilibrium = endTimeForEquilibrium;
     }
 
+    void SetTimeForChanging(double timeForChanging)
+    {
+      mTimeForChanging = timeForChanging;
+    }
 };
 
 #include "SerializationExportWrapper.hpp"

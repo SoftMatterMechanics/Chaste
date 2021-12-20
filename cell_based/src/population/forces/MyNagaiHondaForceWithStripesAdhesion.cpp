@@ -43,12 +43,15 @@ MyNagaiHondaForceWithStripesAdhesion<DIM>::MyNagaiHondaForceWithStripesAdhesion(
      mNagaiHondaMembraneSurfaceEnergyParameter(0.1),
      mNagaiHondaCellCellAdhesionEnergyParameter(0.0),
      mNagaiHondaCellBoundaryAdhesionEnergyParameter(0.0),
+     mChangedNagaiHondaMembraneSurfaceEnergyParameter(0.1),
+     mChangedNagaiHondaCellCellAdhesionEnergyParameter(0.0),
      mUseFixedTargetArea(true),
      mCaseNumberOfMembraneSurfaceEnergyForm(0),
      mIfUseFaceElementToGetAdhesionParameter(false),
      mOutputInformationForNagaiHondaForce(false),
      mLeadingCellNumber(1),
-     mPullingForceOnLeadingCell(0.0)
+     mPullingForceOnLeadingCell(0.0),
+     mTimeForChanging(150.0)
 {
 }
 
@@ -938,37 +941,37 @@ void MyNagaiHondaForceWithStripesAdhesion<DIM>::AddForceContribution(AbstractCel
                             iter != containing_elem_indices.end();
                             ++iter)
                         {
-                            // if (p_cell_population->GetElement(*iter)->GetIsLeadingCellTop())
-                            // {
-                            //     unsigned num_nodes_of_this_leading_cell = p_cell_population->GetElement(*iter)->GetNumNodes();
-                            //     force_on_node[1] += (mPullingForceOnLeadingCell/mLeadingCellNumber)/num_nodes_of_this_leading_cell;
-                            // }
-
-                            VertexElement<DIM, DIM>* p_element = p_cell_population->GetElement(*iter);
-                            if (p_element->GetIsLeadingCell())
+                            if (p_cell_population->GetElement(*iter)->GetIsLeadingCellTop())
                             {
-                                c_vector<double, DIM> normal = zero_vector<double>(DIM);
-                                normal[0] = 0.0;
-                                normal[1] = 1.0;
-
-                                unsigned num_nodes_of_this_leading_cell = p_element->GetNumNodes();
-                                for (unsigned local_index=0; local_index<num_nodes_of_this_leading_cell; local_index++)
-                                {
-                                    Node<DIM>* p_node = p_element->GetNode(local_index);
-                                    unsigned next_node_local_index = (local_index+1)%num_nodes_of_this_leading_cell;
-                                    Node<DIM>* p_next_node = p_element->GetNode(next_node_local_index);
-                                    
-                                    if ((p_node->IsBoundaryNode())&&(p_next_node->IsBoundaryNode()))
-                                    {
-                                        normal[0] = p_element->GetNodeLocation(next_node_local_index)[1] - p_element->GetNodeLocation(local_index)[1];
-                                        normal[1] = -(p_element->GetNodeLocation(next_node_local_index)[0] - p_element->GetNodeLocation(local_index)[0]);
-                                        break;
-                                    }     
-                                }
-
-                                force_on_node[0] += mPullingForceOnLeadingCell/containing_elem_indices.size()/num_nodes_of_this_leading_cell*normal[0]/norm_2(normal);
-                                force_on_node[1] += mPullingForceOnLeadingCell/containing_elem_indices.size()/num_nodes_of_this_leading_cell*normal[1]/norm_2(normal);
+                                unsigned num_nodes_of_this_leading_cell = p_cell_population->GetElement(*iter)->GetNumNodes();
+                                force_on_node[1] += (mPullingForceOnLeadingCell/mLeadingCellNumber)/num_nodes_of_this_leading_cell;
                             }
+
+                            // VertexElement<DIM, DIM>* p_element = p_cell_population->GetElement(*iter);
+                            // if (p_element->GetIsLeadingCell())
+                            // {
+                            //     c_vector<double, DIM> normal = zero_vector<double>(DIM);
+                            //     normal[0] = 0.0;
+                            //     normal[1] = 1.0;
+
+                            //     unsigned num_nodes_of_this_leading_cell = p_element->GetNumNodes();
+                            //     for (unsigned local_index=0; local_index<num_nodes_of_this_leading_cell; local_index++)
+                            //     {
+                            //         Node<DIM>* p_node = p_element->GetNode(local_index);
+                            //         unsigned next_node_local_index = (local_index+1)%num_nodes_of_this_leading_cell;
+                            //         Node<DIM>* p_next_node = p_element->GetNode(next_node_local_index);
+                                    
+                            //         if ((p_node->IsBoundaryNode())&&(p_next_node->IsBoundaryNode()))
+                            //         {
+                            //             normal[0] = p_element->GetNodeLocation(next_node_local_index)[1] - p_element->GetNodeLocation(local_index)[1];
+                            //             normal[1] = -(p_element->GetNodeLocation(next_node_local_index)[0] - p_element->GetNodeLocation(local_index)[0]);
+                            //             break;
+                            //         }     
+                            //     }
+
+                            //     force_on_node[0] += mPullingForceOnLeadingCell/containing_elem_indices.size()/num_nodes_of_this_leading_cell*normal[0]/norm_2(normal);
+                            //     force_on_node[1] += mPullingForceOnLeadingCell/containing_elem_indices.size()/num_nodes_of_this_leading_cell*normal[1]/norm_2(normal);
+                            // }
                         }
 
                     }
@@ -1247,13 +1250,29 @@ double MyNagaiHondaForceWithStripesAdhesion<DIM>::GetNagaiHondaDeformationEnergy
 template<unsigned DIM>
 double MyNagaiHondaForceWithStripesAdhesion<DIM>::GetNagaiHondaMembraneSurfaceEnergyParameter()
 {
-    return mNagaiHondaMembraneSurfaceEnergyParameter;
+    double dt = SimulationTime::Instance()->GetTime();
+    if (dt>mTimeForChanging)
+    {
+        return mChangedNagaiHondaMembraneSurfaceEnergyParameter;
+    }    
+    else
+    {
+        return mNagaiHondaMembraneSurfaceEnergyParameter;
+    }
 }
 
 template<unsigned DIM>
 double MyNagaiHondaForceWithStripesAdhesion<DIM>::GetNagaiHondaCellCellAdhesionEnergyParameter()
 {
-    return mNagaiHondaCellCellAdhesionEnergyParameter;
+    double dt = SimulationTime::Instance()->GetTime();
+    if (dt>mTimeForChanging)
+    {
+        return mChangedNagaiHondaCellCellAdhesionEnergyParameter;
+    }    
+    else
+    {
+        return mNagaiHondaCellCellAdhesionEnergyParameter;
+    }
 }
 
 template<unsigned DIM>
@@ -1284,6 +1303,18 @@ template<unsigned DIM>
 void MyNagaiHondaForceWithStripesAdhesion<DIM>::SetNagaiHondaCellBoundaryAdhesionEnergyParameter(double cellBoundaryAdhesionEnergyParameter)
 {
     mNagaiHondaCellBoundaryAdhesionEnergyParameter = cellBoundaryAdhesionEnergyParameter;
+}
+
+template<unsigned DIM>
+void MyNagaiHondaForceWithStripesAdhesion<DIM>::SetChangedNagaiHondaMembraneSurfaceEnergyParameter(double changedMembraneSurfaceEnergyParameter)
+{
+    mChangedNagaiHondaMembraneSurfaceEnergyParameter = changedMembraneSurfaceEnergyParameter;
+}
+
+template<unsigned DIM>
+void MyNagaiHondaForceWithStripesAdhesion<DIM>::SetChangedNagaiHondaCellCellAdhesionEnergyParameter(double changedCellCellAdhesionEnergyParameter)
+{
+    mChangedNagaiHondaCellCellAdhesionEnergyParameter = changedCellCellAdhesionEnergyParameter;
 }
 
 template<unsigned DIM>

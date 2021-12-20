@@ -85,8 +85,8 @@ public:
         double Ks_for_adhesion_feedback = 0.1; // 1.0 for defaut
         double pulling_force_on_leading_cell = 3.0/pow((M_PI/reference_area),1.5);// Fy
         double polarity_magnitude = 0.4;
-        unsigned seed_for_initial_random_polarity = 4u;
-        double end_time = 800.0*(M_PI/reference_area);
+        unsigned seed_for_initial_random_polarity = 17u;
+        double end_time = 600.0*(M_PI/reference_area);
 
 /* Strip Structure & Cell Mesh */
         bool   strip_width_doubled_for_multiple_leading_cells = false;
@@ -99,7 +99,7 @@ public:
         int    move_mesh_right_for_N_periods = 0; // for display of multiple periods
         bool   one_strip_only_in_a_period = true;
 
-        unsigned num_ele_cross = 40; // must be even number
+        unsigned num_ele_cross = 20; // must be even number
         if  (if_use_larger_strip_distance)
             num_ele_cross = (unsigned)round(num_ele_cross*strip_dis_multiplier);
 
@@ -110,7 +110,7 @@ public:
         double center_of_width = 0.0;       // change made by Chao
         double width = num_ele_cross*sqrt(initial_area/(sqrt(3)/2));   //width of reservoir, change made by Chao
 
-        double strip_width = 20*sqrt(initial_area/(sqrt(3)/2)); // default =0.9523 (1/2 cell width)
+        double strip_width = 7.5*sqrt(initial_area/(sqrt(3)/2)); // default =0.9523 (1/2 cell width)
         if  (strip_width_doubled_for_multiple_leading_cells)
             strip_width = strip_width*strip_width_mutiple;
       //  strip_width *= strip_width_multiple_for_sliding;

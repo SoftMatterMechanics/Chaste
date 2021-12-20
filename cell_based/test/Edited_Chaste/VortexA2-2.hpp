@@ -84,9 +84,9 @@ public:
         double Km_for_myosin_feedback = 0.1; // 1.0 for defaut
         double Ks_for_adhesion_feedback = 0.1; // 1.0 for defaut
         double pulling_force_on_leading_cell = 3.0/pow((M_PI/reference_area),1.5);// Fy
-        double polarity_magnitude = 0.4;
-        unsigned seed_for_initial_random_polarity = 3u;
-        double end_time = 800.0*(M_PI/reference_area);
+        double polarity_magnitude = 0.2;
+        unsigned seed_for_initial_random_polarity = 1u;
+        double end_time = 600.0*(M_PI/reference_area);
 
 /* Strip Structure & Cell Mesh */
         bool   strip_width_doubled_for_multiple_leading_cells = false;

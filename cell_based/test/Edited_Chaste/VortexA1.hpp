@@ -85,7 +85,7 @@ public:
         double Ks_for_adhesion_feedback = 0.1; // 1.0 for defaut
         double pulling_force_on_leading_cell = 3.0/pow((M_PI/reference_area),1.5);// Fy
         double polarity_magnitude = 0.4;
-        unsigned seed_for_initial_random_polarity = 2u;
+        unsigned seed_for_initial_random_polarity = 3u;
         double end_time = 800.0*(M_PI/reference_area);
 
 /* Strip Structure & Cell Mesh */
@@ -198,7 +198,7 @@ public:
         bool   if_check_for_T4_swaps = false;
         
         double sampling_time = 1.0*(M_PI/reference_area);
-        double small_change_for_area_calculation = 0.2/sqrt((M_PI/reference_area));
+        double small_change_for_area_calculation = 0.25/sqrt((M_PI/reference_area));
         
 /* 5. Pulling Force */
         // Note that pulling force is realized by different ways for epithelial bridge and vortex formation
@@ -515,7 +515,7 @@ public:
         p_face_value_and_stress_state_modifier->SetReferenceStress(reference_stress_for_cc_adhesion);
 
         // changed feedback
-        p_face_value_and_stress_state_modifier->SetTimeForChangingFeedback(time_for_changing_feedback);
+        p_face_value_and_stress_state_modifier->SetTimeForChanging(time_for_changing_feedback);
         p_face_value_and_stress_state_modifier->SetChangedKmForMyosinFeedback(changed_Km_for_myosin_feedback);
         p_face_value_and_stress_state_modifier->SetChangedFeedbackRate(changed_feedback_rate);
         p_face_value_and_stress_state_modifier->SetChangedMyosinActivityBaseValue(changed_myosin_activity_base_value);

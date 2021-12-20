@@ -9,7 +9,12 @@ Edited_Chaste/Qarameter8.hpp
 Edited_Chaste/Qarameter9.hpp
 Edited_Chaste/Qarameter10.hpp
 Edited_Chaste/VortexA1.hpp
-Edited_Chaste/VortexA2.hpp
-Edited_Chaste/VortexA3.hpp
-Edited_Chaste/VortexA4.hpp
+Edited_Chaste/VortexA2-1.hpp
+Edited_Chaste/VortexA2-2.hpp
+Edited_Chaste/VortexA3-1.hpp
+Edited_Chaste/VortexA3-2.hpp
 Edited_Chaste/VortexA4-1.hpp
+Edited_Chaste/VortexA4-2.hpp
+Edited_Chaste/VortexA5-1.hpp
+Edited_Chaste/VortexA5-2.hpp
+Edited_Chaste/BridgeRelaxation.hpp

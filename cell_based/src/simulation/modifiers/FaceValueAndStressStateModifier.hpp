@@ -66,6 +66,7 @@ class FaceValueAndStressStateModifier : public AbstractCellBasedSimulationModifi
 
 protected:
 
+    bool   mIfConsiderFeedbackOfFaceValues;
     bool   mIfConsiderFeedbackOfElementMyosinActivity;
     bool   mIfConsiderFeedbackOfFaceValuesOnlyForBoundaryCells;
     bool   mIfConsiderFeedbackOfFaceValuesOnlyForTopBoundaryCells;
@@ -126,8 +127,9 @@ protected:
     double mMyosinActivityDepressedTime;
     double mMyosinActivityDepressingRate;
 
-    double mTimeForChangingFeedback;
+    double mTimeForChanging;
     double mChangedKmForMyosinFeedback;
+    double mChangedKsForAdhesionFeedback;
     double mChangedFeedbackRate;
     double mChangedMyosinActivityBaseValue;
 
@@ -211,6 +213,11 @@ public:
     void UpdateLamellipodiumInfoOfCells(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
 
     // feedback form:
+    void SetConsiderFeedbackOfFaceValues(bool ifConsiderFeedbackOfFaceValues)
+    {
+      mIfConsiderFeedbackOfFaceValues = ifConsiderFeedbackOfFaceValues;
+    }
+
     void SetConsiderFeedbackOfElementMyosinActivity(bool ifConsiderFeedbackOfElementMyosinActivity)
     {
       mIfConsiderFeedbackOfElementMyosinActivity = ifConsiderFeedbackOfElementMyosinActivity;
@@ -448,14 +455,19 @@ public:
     }
 
     // for changing feedback after a particulat time
-    void SetTimeForChangingFeedback(double timeForChangingFeedback)
+    void SetTimeForChanging(double timeForChanging)
     {
-      mTimeForChangingFeedback = timeForChangingFeedback;
+      mTimeForChanging = timeForChanging;
     }
 
     void SetChangedKmForMyosinFeedback(double changedKmForMyosinFeedback)
     {
       mChangedKmForMyosinFeedback = changedKmForMyosinFeedback;
+    }
+
+    void SetChangedKsForAdhesionFeedback(double changedKsForAdhesionFeedback)
+    {
+      mChangedKsForAdhesionFeedback = changedKsForAdhesionFeedback;
     }
 
     void SetChangedFeedbackRate(double changedFeedbackRate)

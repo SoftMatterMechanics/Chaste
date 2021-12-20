@@ -39,6 +39,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<unsigned DIM>
 FaceValueAndStressStateModifier<DIM>::FaceValueAndStressStateModifier()
     : AbstractCellBasedSimulationModifier<DIM>(),
+      mIfConsiderFeedbackOfFaceValues(false),
       mIfConsiderFeedbackOfElementMyosinActivity(false),
       mIfConsiderFeedbackOfFaceValuesOnlyForBoundaryCells(false),
       mIfConsiderFeedbackOfFaceValuesOnlyForTopBoundaryCells(false),
@@ -63,7 +64,7 @@ FaceValueAndStressStateModifier<DIM>::FaceValueAndStressStateModifier()
       mKsForAdhesionFeedback(1.0),
       mFeedbackRateForAdhesion(1.0),
       mHillPowerForAdhesion(8.0),
-      mReferenceStress(1.0),
+      mReferenceStress(2.0),
 
       mIfCalculateStressState(true),
       mIfSetCellDataOfEachForceContributions(false),
@@ -89,8 +90,9 @@ FaceValueAndStressStateModifier<DIM>::FaceValueAndStressStateModifier()
 
       mIfOutputModifierInformation(false),
 
-      mTimeForChangingFeedback(DOUBLE_UNSET),
+      mTimeForChanging(DOUBLE_UNSET),
       mChangedKmForMyosinFeedback(1.0),
+      mChangedKsForAdhesionFeedback(1.0),
       mChangedFeedbackRate(0.0),
       mChangedMyosinActivityBaseValue(1.0)
 
@@ -1020,6 +1022,21 @@ void FaceValueAndStressStateModifier<DIM>::UpdateStressStateOfCell(AbstractCellP
             oss << "elem_myo";
             name_item = oss.str();
             pCell->GetCellData()->SetItem(name_item, p_element->GetElementMyosinActivity());
+
+            double max_cell_cell_adhesion = 0.0;
+            for (unsigned local_index =0; local_index < p_element->GetNumNodes(); local_index++)
+            {
+                Node<DIM>* pNodeA = p_element->GetNode(local_index);
+                Node<DIM>* pNodeB = p_element->GetNode((local_index+1)%p_element->GetNumNodes());
+                VertexElement<DIM-1,  DIM>* pFace = nullptr;
+                pFace = p_element->GetFace(p_element->GetFaceLocalIndexUsingStartAndEndNodeGlobalIndex(pNodeA->GetIndex(), pNodeB->GetIndex()));
+ 
+                if (pFace->GetUnifiedCellCellAdhesionEnergyParameter()>max_cell_cell_adhesion)
+                {
+                    max_cell_cell_adhesion = pFace->GetUnifiedCellCellAdhesionEnergyParameter();
+                }
+            }
+            pCell->GetCellData()->SetItem("max_cell_cell_adhesion", max_cell_cell_adhesion);
         }
         
         assert((shape_tensor_XX + shape_tensor_YY + shape_tensor_XY) < DOUBLE_UNSET );
@@ -1314,7 +1331,7 @@ void FaceValueAndStressStateModifier<DIM>::UpdateMyosinActivtyOfElement(MutableV
 
     double element_myosin_activity = pElement->GetElementMyosinActivity();
 
-    if (time_now>mTimeForChangingFeedback)
+    if (time_now>mTimeForChanging)
     {
         Km = this->mChangedKmForMyosinFeedback;
         beta = this->mChangedFeedbackRate;
@@ -1379,9 +1396,16 @@ void FaceValueAndStressStateModifier<DIM>::UpdateUnifiedCellCellAdhesionEnergyPa
     double dt = SimulationTime::Instance()->GetTimeStep();
 
     double feedback_rate = this->mFeedbackRateForAdhesion;
+    double Ks = this->mKsForAdhesionFeedback;
+    if (dt>mTimeForChanging)
+    {
+        feedback_rate = this->mChangedFeedbackRate;
+        Ks = this->mChangedKsForAdhesionFeedback;
+    }
+
     assert(feedback_rate!=0);
     double q = this->mHillPowerForAdhesion;
-    double Ks = this->mKsForAdhesionFeedback;
+    
     double pho = (1+Ks)*feedback_rate;
     double ksi = 1.0*feedback_rate;
     double reference_stress = mReferenceStress;
